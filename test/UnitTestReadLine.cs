@@ -566,6 +566,9 @@ namespace Test
             }
             var colorOptions = new SetPSReadLineOption {Colors = colors};
             PSConsoleReadLine.SetOptions(colorOptions);
+
+            _console.Init(new object[] { });
+            PSConsoleReadLine.ReadLine(null, null);
         }
     }
 
