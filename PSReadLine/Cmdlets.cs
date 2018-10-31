@@ -486,7 +486,7 @@ namespace Microsoft.PowerShell
         }
     }
 
-    [Cmdlet("Get", "PSReadLineOption", HelpUri = "https://go.microsoft.com/fwlink/?LinkId=528808")]
+    [Cmdlet("Get", "PSReadLine3Option", HelpUri = "https://go.microsoft.com/fwlink/?LinkId=528808")]
     [OutputType(typeof(PSConsoleReadLineOptions))]
     public class GetPSReadLineOption : PSCmdlet
     {
@@ -497,7 +497,7 @@ namespace Microsoft.PowerShell
         }
     }
 
-    [Cmdlet("Set", "PSReadLineOption", HelpUri = "https://go.microsoft.com/fwlink/?LinkId=528811")]
+    [Cmdlet("Set", "PSReadLine3Option", HelpUri = "https://go.microsoft.com/fwlink/?LinkId=528811")]
     public class SetPSReadLineOption : PSCmdlet
     {
         [Parameter]
