@@ -101,20 +101,20 @@ task CheckPlatyPSInstalled `
 
 $buildMamlParams = @{
     Inputs  = { Get-ChildItem docs/*.md }
-    Outputs = "$targetDir/en-US/Microsoft.PowerShell.PSReadLine2.dll-help.xml"
+    Outputs = "$targetDir/en-US/Microsoft.PowerShell.PSReadLine3.dll-help.xml"
 }
 
 <#
 Synopsis: Generate maml help from markdown
 #>
 task BuildMamlHelp @buildMamlParams {
-    platyPS\New-ExternalHelp docs -Force -OutputPath $targetDir/en-US/Microsoft.PowerShell.PSReadLine2.dll-help.xml
+    platyPS\New-ExternalHelp docs -Force -OutputPath $targetDir/en-US/Microsoft.PowerShell.PSReadLine3.dll-help.xml
 }
 
 $buildAboutTopicParams = @{
     Inputs = {
          Get-ChildItem docs/about_PSReadLine.help.txt
-         "PSReadLine/bin/$Configuration/$target/Microsoft.PowerShell.PSReadLine2.dll"
+         "PSReadLine/bin/$Configuration/$target/Microsoft.PowerShell.PSReadLine3.dll"
          "$PSScriptRoot/GenerateFunctionHelp.ps1"
          "$PSScriptRoot/CheckHelp.ps1"
     }
@@ -145,7 +145,7 @@ task BuildAboutTopic @buildAboutTopicParams {
 
 $binaryModuleParams = @{
     Inputs  = { Get-ChildItem PSReadLine/*.cs, PSReadLine/PSReadLine.csproj, PSReadLine/PSReadLineResources.resx }
-    Outputs = "PSReadLine/bin/$Configuration/$target/Microsoft.PowerShell.PSReadLine2.dll"
+    Outputs = "PSReadLine/bin/$Configuration/$target/Microsoft.PowerShell.PSReadLine3.dll"
 }
 
 <#
@@ -224,8 +224,8 @@ task LayoutModule BuildMainModule, BuildMamlHelp, {
         'PSReadLine/Changes.txt',
         'PSReadLine/License.txt',
         'PSReadLine/SamplePSReadLineProfile.ps1',
-        'PSReadLine/PSReadLine.format.ps1xml',
-        'PSReadLine/PSReadLine.psm1'
+        'PSReadLine/PSReadLine3.format.ps1xml',
+        'PSReadLine/PSReadLine3.psm1'
 
     foreach ($file in $extraFiles)
     {
@@ -233,7 +233,7 @@ task LayoutModule BuildMainModule, BuildMamlHelp, {
     }
 
     $binPath = "PSReadLine/bin/$Configuration/$target/publish"
-    Copy-Item $binPath/Microsoft.PowerShell.PSReadLine2.dll $targetDir
+    Copy-Item $binPath/Microsoft.PowerShell.PSReadLine3.dll $targetDir
 
     if (Test-Path $binPath/System.Runtime.InteropServices.RuntimeInformation.dll)
     {
@@ -245,12 +245,12 @@ task LayoutModule BuildMainModule, BuildMamlHelp, {
     }
 
     # Copy module manifest, but fix the version to match what we've specified in the binary module.
-    $version = (Get-ChildItem -Path $targetDir/Microsoft.PowerShell.PSReadLine2.dll).VersionInfo.FileVersion
-    $moduleManifestContent = Get-Content -Path 'PSReadLine/PSReadLine.psd1' -Raw
+    $version = (Get-ChildItem -Path $targetDir/Microsoft.PowerShell.PSReadLine3.dll).VersionInfo.FileVersion
+    $moduleManifestContent = Get-Content -Path 'PSReadLine/PSReadLine3.psd1' -Raw
 
     $getContentArgs = @{
         Raw = $true;
-        Path = "./bin/$Configuration/PSReadLine/Microsoft.PowerShell.PSReadLine2.dll"
+        Path = "./bin/$Configuration/PSReadLine/Microsoft.PowerShell.PSReadLine3.dll"
     }
     if ($PSVersionTable.PSEdition -eq 'Core')
     {
@@ -275,7 +275,7 @@ task LayoutModule BuildMainModule, BuildMamlHelp, {
     }
 
     $moduleManifestContent = [regex]::Replace($moduleManifestContent, "ModuleVersion = '.*'", "ModuleVersion = '$version'")
-    $moduleManifestContent | Set-Content -Path $targetDir/PSReadLine.psd1
+    $moduleManifestContent | Set-Content -Path $targetDir/PSReadLine3.psd1
 
     # Make sure we don't ship any read-only files
     foreach ($file in (Get-ChildItem -Recurse -File $targetDir))
@@ -351,7 +351,7 @@ task Publish -If ($Configuration -eq 'Release') {
         }
     }
 
-    $manifest = Import-PowerShellDataFile $binDir/PSReadLine.psd1
+    $manifest = Import-PowerShellDataFile $binDir/PSReadLine3.psd1
 
     $version = $manifest.ModuleVersion
     if ($null -ne $manifest.PrivateData)
