@@ -48,7 +48,7 @@ $polyFillerParams = @{
 
 $binaryModuleParams = @{
     Inputs  = { Get-ChildItem PSReadLine/*.cs, PSReadLine/PSReadLine.csproj, PSReadLine/PSReadLineResources.resx, Polyfill/*.cs, Polyfill/Polyfill.csproj }
-    Outputs = "PSReadLine/bin/$Configuration/$Framework/Microsoft.PowerShell.PSReadLine2.dll"
+    Outputs = "PSReadLine/bin/$Configuration/$Framework/Microsoft.PowerShell.PSReadLine3.dll"
 }
 
 $xUnitTestParams = @{
@@ -141,7 +141,7 @@ task LayoutModule BuildPolyfiller, BuildMainModule, {
     }
 
     $binPath = "PSReadLine/bin/$Configuration/$Framework/publish"
-    Copy-Item $binPath/Microsoft.PowerShell.PSReadLine2.dll $targetDir
+    Copy-Item $binPath/Microsoft.PowerShell.PSReadLine3.dll $targetDir
 
     if (Test-Path $binPath/System.Runtime.InteropServices.RuntimeInformation.dll) {
         Copy-Item $binPath/System.Runtime.InteropServices.RuntimeInformation.dll $targetDir
@@ -151,7 +151,7 @@ task LayoutModule BuildPolyfiller, BuildMainModule, {
 
     # Copy module manifest, but fix the version to match what we've specified in the binary module.
     $moduleManifestContent = ConvertTo-CRLF (Get-Content -Path 'PSReadLine/PSReadLine.psd1' -Raw)
-    $versionInfo = (Get-ChildItem -Path $targetDir/Microsoft.PowerShell.PSReadLine2.dll).VersionInfo
+    $versionInfo = (Get-ChildItem -Path $targetDir/Microsoft.PowerShell.PSReadLine3.dll).VersionInfo
     $version = $versionInfo.FileVersion
     $semVer = $versionInfo.ProductVersion
 
