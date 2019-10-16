@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#if UNIT_TESTS
+
+using System.Text;
 using Microsoft.PowerShell;
 using Xunit;
 
@@ -6,15 +8,13 @@ namespace Test
 {
     public sealed class ViRegisterTests
     {
-        #region Linewize paste
-
         [Fact]
-        public void ViRegister_Fragment_LinewizePasteBefore()
+        public void ViRegister_Fragment_LinewisePasteBefore()
         {
             const string yanked = "line1";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -30,12 +30,12 @@ namespace Test
         }
 
         [Fact]
-        public void ViRegister_Lines_LinewizePasteBefore()
+        public void ViRegister_Lines_LinewisePasteBefore()
         {
             const string yanked = "line1\n";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -52,12 +52,12 @@ namespace Test
 
 
         [Fact]
-        public void ViRegister_Fragment_LinewizePasteAfter_Fragment()
+        public void ViRegister_Fragment_LinewisePasteAfter_Fragment()
         {
             const string yanked = "line2";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -73,12 +73,12 @@ namespace Test
         }
 
         [Fact]
-        public void ViRegister_Fragment_LinewizePasteAfter_Lines()
+        public void ViRegister_Fragment_LinewisePasteAfter_Lines()
         {
             const string yanked = "line2";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -94,12 +94,12 @@ namespace Test
         }
 
         [Fact]
-        public void ViRegister_Lines_LinewizePasteAfter_Fragment()
+        public void ViRegister_Lines_LinewisePasteAfter_Fragment()
         {
             const string yanked = "line2\nline3\n";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -115,12 +115,12 @@ namespace Test
         }
 
         [Fact]
-        public void ViRegister_Lines_LinewizePasteAfter_Lines()
+        public void ViRegister_Lines_LinewisePasteAfter_Lines()
         {
             const string yanked = "line2\nline3\n";
 
-            var register = new PSConsoleReadLine.ViRegister();
-            register.LinewizeRecord(yanked);
+            var register = new PSConsoleReadLine.ViRegister(null);
+            register.LinewiseRecord(yanked);
 
             // system under test
 
@@ -134,7 +134,7 @@ namespace Test
             Assert.Equal("line1\nline2\nline3\n", buffer.ToString());
             Assert.Equal(6, newPosition);
         }
-
-        #endregion
     }
 }
+
+#endif // UNIT_TESTS

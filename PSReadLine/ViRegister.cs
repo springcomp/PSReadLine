@@ -6,46 +6,24 @@ namespace Microsoft.PowerShell
     public partial class PSConsoleReadLine
     {
         /// <summary>
-        /// Used to report when the buffer is about to change
-        /// as part of a paste operation.
-        /// </summary>
-        public sealed class PasteEventArgs : EventArgs
-        {
-            /// <summary>
-            /// The text being pasted.
-            /// </summary>
-            public string Text { get; set; }
-            /// <summary>
-            /// The position in the buffer at
-            /// which the pasted text will be inserted.
-            /// </summary>
-            public int Position { get; set; }
-            /// <summary>
-            /// The recorded position in the buffer
-            /// from which the paste operation originates.
-            /// This is usually the same as Position, but
-            /// not always. For instance, when pasting a
-            /// linewise selection before the current line,
-            /// the Anchor is the cursor position, whereas
-            /// the Position is the beginning of the previous line.
-            /// </summary>
-            public int Anchor { get; set; }
-        }
-
-        /// <summary>
         /// Represents a named register.
         /// </summary>
-        public sealed class ViRegister
+        internal sealed class ViRegister
         {
+            private readonly PSConsoleReadLine _singleton;
             private string _text;
-            private bool _linewise;
 
             /// <summary>
-            /// Raised when the text from this register is about
-            /// to be pasted to the buffer specified as part of
-            /// a call to Paste[After|Before].
+            /// Initialize a new instance of the <see cref="ViRegister" /> class.
             /// </summary>
-            public event EventHandler<PasteEventArgs> OnInserting;
+            /// <param name="singleton">The <see cref="PSConsoleReadLine" /> object.
+            /// Used to hook into the undo / redo subsystem as part of
+            /// pasting the contents of the register into a buffer.
+            /// </param>
+            public ViRegister(PSConsoleReadLine singleton)
+            {
+                _singleton = singleton;
+            }
 
             /// <summary>
             /// Returns whether this register is empty.
@@ -57,9 +35,11 @@ namespace Microsoft.PowerShell
             /// Returns whether this register contains
             /// linewise yanked text.
             /// </summary>
-            public bool Linewise
-                => _linewise;
+            public bool HasLinewiseText { get; private set; }
 
+            /// <summary>
+            /// Gets the raw text contained in the register
+            /// </summary>
             public string RawText
                 => _text;
 
@@ -83,7 +63,7 @@ namespace Microsoft.PowerShell
                 System.Diagnostics.Debug.Assert(offset >= 0 && offset < buffer.Length);
                 System.Diagnostics.Debug.Assert(offset + count <= buffer.Length);
 
-                _linewise = false;
+                HasLinewiseText = false;
                 _text = buffer.ToString(offset, count);
             }
 
@@ -91,9 +71,9 @@ namespace Microsoft.PowerShell
             /// Records a block of lines in the register.
             /// </summary>
             /// <param name="text"></param>
-            public void LinewizeRecord(string text)
+            public void LinewiseRecord(string text)
             {
-                _linewise = true;
+                HasLinewiseText = true;
                 _text = text;
             }
 
@@ -110,7 +90,7 @@ namespace Microsoft.PowerShell
                     return position;
                 }
 
-                if (_linewise)
+                if (HasLinewiseText)
                 {
                     var text = _text;
 
@@ -161,7 +141,7 @@ namespace Microsoft.PowerShell
 
             public int PasteBefore(StringBuilder buffer, int position)
             {
-                if (_linewise)
+                if (HasLinewiseText)
                 {
                     // currently, in Vi Edit Mode, the cursor may be positioned
                     // exactly one character past the end of the buffer.
@@ -208,13 +188,13 @@ namespace Microsoft.PowerShell
 
             private void InsertBefore(StringBuilder buffer, string text, int pastePosition, int position)
             {
-                OnInserting?.Invoke(this, new PasteEventArgs { Text = text, Position = pastePosition, Anchor = position, });
+                RecordPaste(text, pastePosition, position);
                 buffer.Insert(pastePosition, text);
             }
 
             private void InsertAt(StringBuilder buffer, string text, int pastePosition, int position)
             {
-                OnInserting?.Invoke(this, new PasteEventArgs { Text = text, Position = pastePosition, Anchor = position, });
+                RecordPaste(text, pastePosition, position);
 
                 // Use Append if possible because Insert at end makes StringBuilder quite slow.
                 if (pastePosition == buffer.Length)
@@ -227,11 +207,44 @@ namespace Microsoft.PowerShell
                 }
             }
 
+            /// <summary>
+            /// Called to record the paste operation in the undo subsystem.
+            /// </summary>
+            /// <param name="text">
+            /// The text being pasted.
+            /// </param>
+            /// <param name="position">
+            /// The position in the buffer at
+            /// which the pasted text will be inserted.
+            /// </param>
+            /// <param name="anchor">
+            /// The recorded position in the buffer
+            /// from which the paste operation originates.
+            /// This is usually the same as Position, but
+            /// not always. For instance, when pasting a
+            /// linewise selection before the current line,
+            /// the Anchor is the cursor position, whereas
+            /// the Position is the beginning of the previous line.
+            /// </param>
+            private void RecordPaste(string text, int position, int anchor)
+            {
+                if (_singleton != null)
+                {
+                    var editItem = EditItemInsertLines.Create(
+                        text,
+                        position,
+                        anchor
+                    );
+
+                    _singleton.SaveEditItem(editItem);
+                }
+            }
+
 #if DEBUG
             public override string ToString()
             {
                 var text = _text.Replace("\n", "\\n");
-                return (_linewise ? "line: " : "") + "\"" + text + "\"";
+                return (HasLinewiseText ? "line: " : "") + "\"" + text + "\"";
             }
 #endif
         }

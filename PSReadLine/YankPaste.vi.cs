@@ -9,37 +9,17 @@ namespace Microsoft.PowerShell
 {
     public partial class PSConsoleReadLine
     {
-        private readonly ViRegister _clipboard = InitializeClipboard();
-
-        internal static ViRegister InitializeClipboard()
-        {
-            // the register's PasteBefore and PasteAfter
-            // methods adjust the cursor position in the buffer
-            // before inserted its content.
-
-            // use this hook to support undo
-
-            var register = new ViRegister();
-            register.OnInserting += (sender, e) =>
-            {
-                var editItem = EditItemInsertLines.Create(
-                    e.Text,
-                    e.Position,
-                    e.Anchor
-                );
-
-                _singleton.SaveEditItem(editItem);
-            };
-
-            return register;
-        }
+        // *must* be initialized in the static ctor
+        // because it depends on static member _singleton
+        // being initialized first.
+        private static readonly ViRegister _clipboard;
 
         /// <summary>
         /// Paste the clipboard after the cursor, moving the cursor to the end of the pasted text.
         /// </summary>
         public static void PasteAfter(ConsoleKeyInfo? key = null, object arg = null)
         {
-            if (_singleton._clipboard.IsEmpty)
+            if (_clipboard.IsEmpty)
             {
                 Ding();
                 return;
@@ -53,7 +33,7 @@ namespace Microsoft.PowerShell
         /// </summary>
         public static void PasteBefore(ConsoleKeyInfo? key = null, object arg = null)
         {
-            if (_singleton._clipboard.IsEmpty)
+            if (_clipboard.IsEmpty)
             {
                 Ding();
                 return;
@@ -86,8 +66,8 @@ namespace Microsoft.PowerShell
         /// <param name="lineCount">The number of lines to record to the unnamed register</param>
         private void SaveLinesToClipboard(int lineIndex, int lineCount)
         {
-            var range = _buffer.GetRange(lineIndex, lineCount);
-            _clipboard.LinewizeRecord(_buffer.ToString(range.Offset, range.Count));
+            var range = MultiLineBufferHelper.GetRange(_buffer, lineIndex, lineCount);
+            _clipboard.LinewiseRecord(_buffer.ToString(range.Offset, range.Count));
         }
 
         /// <summary>
