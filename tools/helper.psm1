@@ -309,7 +309,8 @@ function Start-TestRun
 function Test-XUnitTestResults
 {
     param(
-        [Parameter(Mandatory, ValueFromPipeline)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias("Fullname")]
         [string] $TestResultsFile
     )
 
