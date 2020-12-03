@@ -611,8 +611,19 @@ namespace Microsoft.PowerShell
         /// </summary>
         public static void ViInsertWithAppend(ConsoleKeyInfo? key = null, object arg = null)
         {
+            _singleton._groupUndoHelper.StartGroup(ViInsertWithAppend, arg);
+
+            ViInsertModeAndForwardChar(null, key, arg);
+        }
+
+        private static void ViInsertModeAndForwardChar(Func<bool> shouldForwardChar = null, ConsoleKeyInfo? key = null, object arg = null)
+        { 
             ViInsertMode(key, arg);
-            ForwardChar(key, arg);
+
+            if (shouldForwardChar == null || shouldForwardChar.Invoke())
+            {
+                ForwardChar(key, arg);
+            }
         }
 
         /// <summary>
@@ -1342,7 +1353,8 @@ namespace Microsoft.PowerShell
             }
             _singleton.SaveEditItem(EditItemInsertChar.Create('\n', insertPoint));
             _singleton.Render();
-            ViInsertWithAppend();
+
+            ViInsertModeAndForwardChar(null, key, arg);
         }
 
         private void MoveToEndOfPhrase()
