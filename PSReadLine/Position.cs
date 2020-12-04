@@ -114,22 +114,12 @@ namespace Microsoft.PowerShell
 
             var newCurrent = beginningOfLine;
 
-            while (IsVisibleBlank(newCurrent))
+            while (_singleton._buffer.IsVisibleBlank(newCurrent))
             {
                 newCurrent++;
             }
 
             return newCurrent;
-        }
-
-        private static bool IsVisibleBlank(int newCurrent)
-        {
-            var c = _singleton._buffer[newCurrent];
-
-            // [:blank:] of vim's pattern matching behavior
-            // defines blanks as SPACE and TAB characters.
-
-            return c == ' ' || c == '\t';
         }
     }
 }

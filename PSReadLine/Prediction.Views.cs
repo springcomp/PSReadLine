@@ -743,12 +743,12 @@ namespace Microsoft.PowerShell
                 }
 
                 int i = currentIndex;
-                if (!_singleton.InWord(_suggestionText[i], wordDelimiters))
+                if (!Character.IsInWord(_suggestionText[i], wordDelimiters))
                 {
                     // Scan to end of current non-word region
                     while (++i < _suggestionText.Length)
                     {
-                        if (_singleton.InWord(_suggestionText[i], wordDelimiters))
+                        if (Character.IsInWord(_suggestionText[i], wordDelimiters))
                         {
                             break;
                         }
@@ -759,7 +759,7 @@ namespace Microsoft.PowerShell
                 {
                     while (++i < _suggestionText.Length)
                     {
-                        if (!_singleton.InWord(_suggestionText[i], wordDelimiters))
+                        if (!Character.IsInWord(_suggestionText[i], wordDelimiters))
                         {
                             if (_suggestionText[i] == ' ')
                             {
