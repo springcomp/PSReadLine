@@ -152,11 +152,13 @@ namespace Microsoft.PowerShell
                 _singleton._lastWordDelimiter = char.MinValue;
             }
 
-            ViInsertModeAndForwardChar(
-                () => (_singleton._current == _singleton._buffer.Length - 1
-                    && !_singleton.IsDelimiter(_singleton._lastWordDelimiter, _singleton.Options.WordDelimiters)
-                    && _singleton._shouldAppend),
-                    key, arg);
+            var shouldForward =
+               _singleton._current == _singleton._buffer.Length - 1
+               && !_singleton.IsDelimiter(_singleton._lastWordDelimiter, _singleton.Options.WordDelimiters)
+               && _singleton._shouldAppend
+               ;
+
+            ViInsertModeAndForwardChar(shouldForward, key, arg);
         }
 
         private static void ViReplaceGlob(ConsoleKeyInfo? key, object arg)
@@ -169,9 +171,11 @@ namespace Microsoft.PowerShell
                 _singleton.MoveCursor(_singleton._current - 1);
             }
 
-            ViInsertModeAndForwardChar(
-                () => _singleton._current == _singleton._buffer.Length - 1,
-                key, arg);
+            var shouldForward =
+                _singleton._current == _singleton._buffer.Length - 1
+                ;
+
+            ViInsertModeAndForwardChar(shouldForward, key, arg);
         }
 
         private static void ViReplaceEndOfWord(ConsoleKeyInfo? key, object arg)
@@ -179,8 +183,11 @@ namespace Microsoft.PowerShell
             _singleton._groupUndoHelper.StartGroup(ViReplaceEndOfWord, arg);
             DeleteEndOfWord(key, arg);
 
-            ViInsertModeAndForwardChar(() => _singleton._current == _singleton._buffer.Length - 1,
-                key, arg);
+            var shouldForward =
+                _singleton._current == _singleton._buffer.Length - 1
+                ;
+
+            ViInsertModeAndForwardChar(shouldForward, key, arg);
         }
 
         private static void ViReplaceEndOfGlob(ConsoleKeyInfo? key, object arg)
@@ -188,8 +195,11 @@ namespace Microsoft.PowerShell
             _singleton._groupUndoHelper.StartGroup(ViReplaceEndOfGlob, arg);
             ViDeleteEndOfGlob(key, arg);
 
-            ViInsertModeAndForwardChar(() => _singleton._current == _singleton._buffer.Length - 1,
-                key, arg);
+            var shouldForward =
+                _singleton._current == _singleton._buffer.Length - 1
+                ;
+
+           ViInsertModeAndForwardChar(shouldForward, key, arg);
         }
 
         private static void ReplaceChar(ConsoleKeyInfo? key, object arg)
@@ -238,8 +248,10 @@ namespace Microsoft.PowerShell
             ViCharacterSearcher.Set(keyChar, isBackward: false, isBackoff: false);
             if (ViCharacterSearcher.SearchDelete(keyChar, arg, backoff: false, instigator: (_key, _arg) => ViReplaceToChar(keyChar, _key, _arg)))
             {
-                ViInsertModeAndForwardChar(() => _singleton._current < initialCurrent || _singleton._current >= _singleton._buffer.Length,
-                    key, arg);
+                var shouldForward =
+                    _singleton._current < initialCurrent || _singleton._current >= _singleton._buffer.Length
+                    ;
+                ViInsertModeAndForwardChar(shouldForward, key, arg);
             }
             else
             {
