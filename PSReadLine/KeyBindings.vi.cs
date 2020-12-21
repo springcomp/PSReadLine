@@ -258,6 +258,7 @@ namespace Microsoft.PowerShell
                 { Keys.E,               MakeKeyHandler( ViReplaceEndOfWord,               "ViReplaceEndOfWord") },
                 { Keys.ucE,             MakeKeyHandler( ViReplaceEndOfGlob,               "ViReplaceEndOfGlob") },
                 { Keys.H,               MakeKeyHandler( BackwardReplaceChar,              "BackwardReplaceChar") },
+                { Keys.I,               MakeKeyHandler( ViChordChangeTextObject,          "ChordViTextObject") },               
                 { Keys.L,               MakeKeyHandler( ReplaceChar,                      "ReplaceChar") },
                 { Keys.Space,           MakeKeyHandler( ReplaceChar,                      "ReplaceChar") },
                 { Keys._0,              MakeKeyHandler( ViBackwardReplaceLine,            "ViBackwardReplaceLine") },

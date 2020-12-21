@@ -26,6 +26,13 @@ namespace Microsoft.PowerShell
             = new Dictionary<TextObjectOperation, IDictionary<TextObjectSpan, KeyHandler>>
             {
                 {
+                    TextObjectOperation.Change,
+                    new Dictionary<TextObjectSpan, KeyHandler>
+                    {
+                        {TextObjectSpan.Inner, MakeKeyHandler(ViChangeInnerWord, "ViChangeInnerWord")}
+                    }
+                },
+                {
                     TextObjectOperation.Delete,
                     new Dictionary<TextObjectSpan, KeyHandler>
                     {
@@ -34,10 +41,20 @@ namespace Microsoft.PowerShell
                 }
             };
 
+        private void ViChordChangeTextObject(ConsoleKeyInfo? key = null, object arg = null)
+        {
+            _textObjectOperation = TextObjectOperation.Change;
+            ViChordTextObject(key, arg);
+        }
+
         private void ViChordDeleteTextObject(ConsoleKeyInfo? key = null, object arg = null)
         {
             _textObjectOperation = TextObjectOperation.Delete;
+            ViChordTextObject(key, arg);
+        }
 
+        private void ViChordTextObject(ConsoleKeyInfo? key = null, object arg = null)
+        {
             if (!key.HasValue)
             {
                 ResetTextObjectState();
@@ -98,58 +115,95 @@ namespace Microsoft.PowerShell
             _singleton._textObjectSpan = TextObjectSpan.None;
         }
 
+        private static void ViChangeInnerWord(ConsoleKeyInfo? key = null, object arg = null)
+        {
+            _singleton._groupUndoHelper.StartGroup(ViChangeInnerWord, arg);
+            _singleton._lastWordDelimiter = char.MinValue;
+            _singleton._shouldAppend = false;
+
+            if (ViDeleteInnerWordImpl(key, arg))
+            {
+                if (_singleton._current == _singleton._buffer.Length - 1
+                    && !_singleton.IsDelimiter(_singleton._lastWordDelimiter, _singleton.Options.WordDelimiters)
+                    && _singleton._shouldAppend)
+                {
+                    ViInsertWithAppend(key, arg);
+                }
+                else
+                {
+                    ViInsertMode(key, arg);
+                }
+            }
+            else
+            {
+                _singleton._groupUndoHelper.EndGroup();
+            }
+        }
+
         private static void ViDeleteInnerWord(ConsoleKeyInfo? key = null, object arg = null)
+        {
+            ViDeleteInnerWordImpl(key, arg);
+        }
+
+        private static bool ViDeleteInnerWordImpl(ConsoleKeyInfo? key = null, object arg = null)
         {
             var delimiters = _singleton.Options.WordDelimiters;
 
-            if (TryGetArgAsInt(arg, out var numericArg, 1))
+            if (!TryGetArgAsInt(arg, out var numericArg, 1))
+                return false;
+
+            if (_singleton._buffer.Length == 0)
             {
-                if (_singleton._buffer.Length == 0)
+                if (numericArg > 1)
                 {
-                    if (numericArg > 1)
-                    {
-                        Ding();
-                    }
-                    return;
+                    Ding();
                 }
-
-                // unless at the end of the buffer a single delete word should not delete backwards
-                // so if the cursor is on an empty line, do nothing
-
-                if (
-                    numericArg == 1 &&
-                    _singleton._current < _singleton._buffer.Length &&
-                    _singleton._buffer.IsLogigalLineEmpty(_singleton._current)
-                )
-                {
-                    return;
-                }
-
-                var start = _singleton._buffer.ViFindBeginningOfWordObjectBoundary(_singleton._current, delimiters);
-                var end = _singleton._current;
-
-                // attempting to find a valid position for multiple words
-                // if no valid position is found, this is a no-op
-
-                {
-                    while (numericArg-- > 0 && end < _singleton._buffer.Length)
-                    {
-                        end = _singleton._buffer.ViFindBeginningOfNextWordObjectBoundary(end, delimiters);
-                    }
-
-                    // attempting to delete too many words should ding
-
-                    if (numericArg > 0)
-                    {
-                        Ding();
-                        return;
-                    }
-                }
-
-                _singleton.RemoveTextToClipboard(start, end - start);
-                _singleton.AdjustCursorPosition(start);
-                _singleton.Render();
+                return false;
             }
+
+            // unless at the end of the buffer a single delete word should not delete backwards
+            // so if the cursor is on an empty line, do nothing
+
+            if (
+                numericArg == 1 &&
+                _singleton._current < _singleton._buffer.Length &&
+                _singleton._buffer.IsLogigalLineEmpty(_singleton._current)
+            )
+            {
+                return false;
+            }
+
+            var start = _singleton._buffer.ViFindBeginningOfWordObjectBoundary(_singleton._current, delimiters);
+            var end = _singleton._current;
+
+            // attempting to find a valid position for multiple words
+            // if no valid position is found, this is a no-op
+
+            {
+                while (numericArg-- > 0 && end < _singleton._buffer.Length)
+                {
+                    end = _singleton._buffer.ViFindBeginningOfNextWordObjectBoundary(end, delimiters);
+                }
+
+                // attempting to delete too many words should ding
+
+                if (numericArg > 0)
+                {
+                    Ding();
+                    return false;
+                }
+            }
+
+            if (end > 0 && _singleton._buffer.IsAtEndOfBuffer(end - 1) && _singleton._buffer.InWord(end - 1, delimiters))
+            {
+                _singleton._shouldAppend = true;
+            }
+
+            _singleton.RemoveTextToClipboard(start, end - start);
+            _singleton.AdjustCursorPosition(start);
+            _singleton.Render();
+
+            return true;
         }
 
         /// <summary>

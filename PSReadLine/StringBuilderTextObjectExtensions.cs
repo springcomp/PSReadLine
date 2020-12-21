@@ -4,7 +4,7 @@ using System.Text;
 namespace Microsoft.PowerShell
 {
     internal static partial class StringBuilderTextObjectExtensions
-    { 
+    {
         /// <summary>
         /// Returns the position of the beginning of the current word as delimited by white space and delimiters
         /// This method differs from <see cref="ViFindPreviousWordPoint(string)" />:
@@ -62,10 +62,15 @@ namespace Microsoft.PowerShell
 
             var i = Math.Min(position, buffer.Length - 1);
 
-            var startedAtBeginningOfLine =
-                i == 0 ||
-                buffer[i - 1] == '\n'
-                ;
+            // always skip the first newline character
+
+            if (buffer[i] == '\n' && i < buffer.Length - 1)
+            {
+                // try to skip a second newline characters
+                // to replicate vim behaviour
+
+                ++i;
+            }
 
             // if starting on a word consider a text object as a sequence of characters excluding the delimiters
             // otherwise, consider a word as a sequence of delimiters
@@ -86,33 +91,17 @@ namespace Microsoft.PowerShell
                     : c => delimiters.IndexOf(c) != -1
                 ;
 
-            // if starting on a newline
+            // try to skip a second newline characters
+            // to replicate vim behaviour
 
             if (buffer[i] == '\n' && i < buffer.Length - 1)
             {
-                // try to skip two newline characters
-                // to replicate vim behaviour
-
                 ++i;
-
-                if (buffer[i] == '\n' && i < buffer.Length - 1)
-                {
-                    ++i;
-                }
             }
 
             // skip to next non word characters
 
             while (i < buffer.Length && isTextObjectChar(buffer[i]))
-            {
-                ++i;
-            }
-
-            // when starting the search on a newline
-            // skip one space character
-            // replicate vim behaviour
-
-            if (startedAtBeginningOfLine && (i < buffer.Length && buffer.IsVisibleBlank(i)) && i < buffer.Length - 1)
             {
                 ++i;
             }
