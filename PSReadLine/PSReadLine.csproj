@@ -3,11 +3,11 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.PowerShell.PSReadLine</RootNamespace>
-    <AssemblyName>Microsoft.PowerShell.PSReadLine2</AssemblyName>
+    <AssemblyName>Microsoft.PowerShell.PSReadLine3</AssemblyName>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
-    <AssemblyVersion>2.3.2.0</AssemblyVersion>
-    <FileVersion>2.3.2</FileVersion>
-    <InformationalVersion>2.3.2-beta2</InformationalVersion>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0</FileVersion>
+    <InformationalVersion>3.0.0</InformationalVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <TargetFrameworks>net462;net6.0</TargetFrameworks>
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
@@ -35,5 +35,10 @@
     <None Include="PSReadLine.format.ps1xml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="SamplePSReadLineProfile.ps1" />
     <None Include="Changes.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PSReadLine3.psd1" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="PSReadLine3.psm1" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="PSReadLine3.format.ps1xml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
