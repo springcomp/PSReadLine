@@ -9,7 +9,7 @@
     <FileVersion>3.0.0</FileVersion>
     <InformationalVersion>3.0.0</InformationalVersion>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <TargetFrameworks>net462;net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>

@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>MockPSConsole</RootNamespace>
     <AssemblyName>MockPSConsole</AssemblyName>
-    <TargetFrameworks>net462;net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <ApplicationManifest>Program.manifest</ApplicationManifest>
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
