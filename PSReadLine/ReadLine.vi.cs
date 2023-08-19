@@ -5,6 +5,7 @@ Copyright (c) Microsoft Corporation.  All rights reserved.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography.Pkcs;
 
 namespace Microsoft.PowerShell
 {
@@ -445,6 +446,7 @@ namespace Microsoft.PowerShell
             _singleton._dispatchTable = _viCmdKeyMap;
             _singleton._chordDispatchTable = _viCmdChordTable;
             ViBackwardChar();
+            ViSelectNamedRegister("");
             _singleton.ViIndicateCommandMode();
         }
 
@@ -746,7 +748,7 @@ namespace Microsoft.PowerShell
 
             var deleteText = _singleton._buffer.ToString(range.Offset, range.Count);
 
-            _viRegister.LinewiseRecord(deleteText);
+            _singleton.SaveLinesToClipboard(deleteText);
 
             var deletePosition = range.Offset;
             var anchor = _singleton._current;
@@ -1148,6 +1150,16 @@ namespace Microsoft.PowerShell
             }
 
             ViChordHandler(_viChordDGTable, arg);
+        }
+
+        private static void ViDQuoteChord(ConsoleKeyInfo? key = null, object arg = null)
+        {
+            if (!key.HasValue)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            ViChordHandler(_viChordDQuoteTable, arg);
         }
 
         private static bool IsNumeric(PSKeyInfo key)
