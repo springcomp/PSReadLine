@@ -172,6 +172,8 @@ namespace Microsoft.PowerShell
                     { Keys.H,           MakeKeyHandler( BackwardDeleteChar,                 "BackwardDeleteChar") },
                     { Keys.I,           MakeChordDispatchTable(new Dictionary<PSKeyInfo, KeyHandlerOrChordDispatchTable>{
 
+                        { Keys.DQuote,  MakeKeyHandler(ViDeleteInnerDQuote,                 "ViDeleteInnerDQuote")},
+                        { Keys.SQuote,  MakeKeyHandler(ViDeleteInnerSQuote,                 "ViDeleteInnerSQuote")},
                         { Keys.W,       MakeKeyHandler(ViDeleteInnerWord,                   "ViDeleteInnerWord")},
                     }) },
 

@@ -5,6 +5,46 @@ namespace Microsoft.PowerShell
     public partial class PSConsoleReadLine
     {
         /// <summary>
+        /// Delete the content inside the current single quoted text
+        /// </summary>
+        public static void ViDeleteInnerSQuote(ConsoleKeyInfo? key = null, object arg = null)
+            => ViDeleteInnerQuotes('\'', key, arg);
+
+        /// <summary>
+        /// Delete the content inside the current double quoted text
+        /// </summary>
+        public static void ViDeleteInnerDQuote(ConsoleKeyInfo? key = null, object arg = null)
+            => ViDeleteInnerQuotes('\"', key, arg);
+
+        private static void ViDeleteInnerQuotes(char delimiter, ConsoleKeyInfo? key = null, object arg = null)
+        {
+            if (!TryGetArgAsInt(arg, out var numericArg, 1))
+            {
+                return;
+            }
+
+            if (_singleton._buffer.Length == 0)
+            {
+                Ding();
+                return;
+            }
+
+            var (start, end) = _singleton._buffer.ViFindSpanOfInnerQuotedTextObjectBoundary(delimiter, _singleton._current, repeated: numericArg);
+
+            if (start == -1 || end == -1)
+            {
+                Ding();
+                return;
+            }
+
+            var position = start;
+
+            _singleton.RemoveTextToViRegister(position, end - position);
+            _singleton.AdjustCursorPosition(position);
+            _singleton.Render();
+        }
+
+        /// <summary>
         /// Delete the content inside and including the current word
         /// </summary>
         public static void ViDeleteInnerWord(ConsoleKeyInfo? key = null, object arg = null)
