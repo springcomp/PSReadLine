@@ -174,6 +174,9 @@ namespace Microsoft.PowerShell
 
                         { Keys.DQuote,  MakeKeyHandler(ViDeleteInnerDQuote,                 "ViDeleteInnerDQuote")},
                         { Keys.SQuote,  MakeKeyHandler(ViDeleteInnerSQuote,                 "ViDeleteInnerSQuote")},
+                        { Keys.LBracket,MakeKeyHandler(ViDeleteInnerBrackets,               "ViDeleteInnerBrackets")},
+                        { Keys.LCurly,  MakeKeyHandler(ViDeleteInnerBraces,                 "ViDeleteInnerBraces")},
+                        { Keys.LParen,  MakeKeyHandler(ViDeleteInnerParens,                 "ViDeleteInnerParens")},
                         { Keys.W,       MakeKeyHandler(ViDeleteInnerWord,                   "ViDeleteInnerWord")},
                     }) },
 

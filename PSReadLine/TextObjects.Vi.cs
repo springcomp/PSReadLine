@@ -5,6 +5,52 @@ namespace Microsoft.PowerShell
     public partial class PSConsoleReadLine
     {
         /// <summary>
+        /// Delete the content inside the current curly-brace-delimited text
+        /// </summary>
+        public static void ViDeleteInnerBraces(ConsoleKeyInfo? key = null, object arg = null)
+            => ViDeleteInnerBraceTextObject("{}", key, arg);
+
+        /// <summary>
+        /// Delete the content inside the current squash-bracket-delimited text
+        /// </summary>
+        public static void ViDeleteInnerBrackets(ConsoleKeyInfo? key = null, object arg = null)
+            => ViDeleteInnerBraceTextObject("[]", key, arg);
+
+        /// <summary>
+        /// Delete the content inside the current parentheses
+        /// </summary>
+        public static void ViDeleteInnerParens(ConsoleKeyInfo? key = null, object arg = null)
+            => ViDeleteInnerBraceTextObject("()", key, arg);
+
+        private static void ViDeleteInnerBraceTextObject(string delimiters, ConsoleKeyInfo? key = null, object arg = null)
+        {
+            if (!TryGetArgAsInt(arg, out var numericArg, 1))
+            {
+                return;
+            }
+
+            if (_singleton._buffer.Length == 0)
+            {
+                Ding();
+                return;
+            }
+
+            var (start, end) = _singleton._buffer.ViFindSpanOfInnerDelimitedTextObjectBoundary(delimiters, _singleton._current, repeated: numericArg);
+
+            if (start == -1 || end == -1)
+            {
+                Ding();
+                return;
+            }
+
+            var position = start;
+
+            _singleton.RemoveTextToViRegister(position, end - position);
+            _singleton.AdjustCursorPosition(position);
+            _singleton.Render();
+        }
+
+        /// <summary>
         /// Delete the content inside the current single quoted text
         /// </summary>
         public static void ViDeleteInnerSQuote(ConsoleKeyInfo? key = null, object arg = null)
