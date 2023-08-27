@@ -112,6 +112,120 @@ namespace Microsoft.PowerShell
         }
 
         /// <summary>
+        /// Returns the span of text within the given delimiters relative to the secified position in the buffer.
+        /// The repeated argument maps to the level of nesting of delimited text, starting at 1.
+        /// 
+        /// This method first attempts to determine if the position is within delimited text by looking forward
+        /// for any number of end delimiters to match the required level of nesting.
+        /// Or returns (-1, -1) if not found.
+        /// 
+        /// Then it looks backwards to find the corresponding start delimiter.
+        /// It returns (-1, -1) if not found.
+        /// 
+        /// This method suports VI i{, i[ and i( text objects.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="delimiters"></param>
+        /// <param name="position"></param>
+        /// <param name="repeated"></param>
+        /// <returns></returns>
+        public static (int Start, int End) ViFindSpanOfInnerDelimitedTextObjectBoundary(this StringBuilder buffer, string delimiters, int position, int repeated = 1)
+        {
+            // Cursor may be past the end of the buffer when calling this method
+            // this may happen if the cursor is at the beginning of a new line.
+
+            var pos = Math.Min(position, buffer.Length - 1);
+
+            var startDelimiter = delimiters[0];
+            var endDelimiter = delimiters[1];
+
+            var start = -1;
+            var end = -1;
+
+            // from the given position, tries to find the end delimiter later in the text
+            // each start delimiter increases the level of nesting while
+            // each end delimiter decreases the level of nesting
+
+            var nesting = repeated;
+
+            // if the position refers to the start delimiter
+            // if must be interpreted as referring to the next
+            // portion of delimited text
+            // this is equivalent as the position referring to
+            // a portion of text with one less level of nesting
+
+            var offset = pos;
+            if (buffer[pos] == startDelimiter)
+            {
+                nesting--;
+            }
+
+            for (; offset < buffer.Length; offset++)
+            {
+                if (buffer[offset] == startDelimiter)
+                {
+                    nesting++;
+                }
+                if (buffer[offset] == endDelimiter)
+                {
+                    nesting--;
+                }
+
+                if (nesting == 0)
+                {
+                    end = offset;
+                    break;
+                }
+            }
+
+            if (end != -1)
+            {
+                // from the given position, tries to find the start delimiter earlier in the text
+                // each start delimiter decreases the level of nesting while
+                // each end delimiter increases the level of nesting
+
+                offset = pos;
+
+                nesting = repeated;
+
+                // if the position refers to the end delimiter
+                // this means we are already inside delimited text.
+                // start looking from the previous character
+
+                if (buffer[offset] == endDelimiter)
+                {
+                    if (offset >= 0)
+                        offset--;
+                }
+
+                for (; offset >= 0; offset--)
+                {
+                    if (buffer[offset] == startDelimiter)
+                    {
+                        nesting--;
+                    }
+                    if (buffer[offset] == endDelimiter)
+                    {
+                        nesting++;
+                    }
+
+                    if (nesting == 0)
+                    {
+                        start = offset;
+                        break;
+                    }
+                }
+            }
+
+            if (start != -1)
+            {
+                start++;
+            }
+
+            return (start, end);
+        }
+
+        /// <summary>
         /// Returns the span of text within the quotes relative to the specified position, in the corresponding logical line.
         /// If the position refers to the given start delimiter, the method returns the position immediately.
         /// If not, it first attempts to look backwards to find the start delimiter and returns its position if found.
